@@ -1,4 +1,4 @@
-html {
+html.pg-pdf-active-root {
   height: 100% !important;
   overflow: hidden !important;
   background: #1e1f22 !important;
@@ -160,7 +160,7 @@ body.pg-pdf-active iframe {
   top: 0;
 }
 
-.hiddenCanvasElement {
+body.pg-pdf-active .hiddenCanvasElement {
   position: absolute;
   top: 0;
   left: 0;

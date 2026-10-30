@@ -120,6 +120,7 @@
   // Replace Chrome's native PDF body entirely so no shadow-root or plugin remains
   removeNativePdfElements();
   document.documentElement.removeAttribute("style");
+  document.documentElement.classList.add("pg-pdf-active-root");
   const freshBody = document.createElement("body");
   freshBody.className = "pg-pdf-active";
   if (document.body) {
