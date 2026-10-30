@@ -8,7 +8,7 @@ A lightweight Manifest V3 Chrome extension that automatically highlights glossar
 2. Toggle **Developer mode** in the top-right corner.
 3. Click **Load unpacked**.
 4. Select the directory:
-   `c:\Users\X13\Desktop\Youjo Senki novels\Light novels\glossary-extension`
+   `\glossary-extension`
 5. On the *PDF Book Quick Glossary* card in `chrome://extensions`, click **Details**.
 6. Turn **ON** the toggle for **Allow access to file URLs** (essential for reading local PDF light novels).
 
