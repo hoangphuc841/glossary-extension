@@ -142,7 +142,10 @@
   topbar.innerHTML = `
     <div class="pg-topbar-title" title="${bookKey}">${bookKey}</div>
     <div class="pg-topbar-controls">
-      <span class="pg-page-indicator" id="pg-page-indicator">Loading...</span>
+      <div class="pg-page-nav">
+        <input type="number" id="pg-page-input" min="1" value="1" title="Jump to page" />
+        <span id="pg-page-total">/ --</span>
+      </div>
       <button class="pg-btn" id="pg-zoom-out" title="Zoom Out (Ctrl+-)">−</button>
       <button class="pg-btn pg-zoom-readout" id="pg-zoom-reset" title="Reset Zoom (Ctrl+0)">100%</button>
       <button class="pg-btn" id="pg-zoom-in" title="Zoom In (Ctrl++)">+</button>
@@ -249,11 +252,15 @@
   const renderedPages = new Set();
   const pageHolders = [];
 
-  const pageIndicatorEl = topbar.querySelector("#pg-page-indicator");
+  const pageInputEl = topbar.querySelector("#pg-page-input");
+  const pageTotalEl = topbar.querySelector("#pg-page-total");
   const zoomResetBtn = topbar.querySelector("#pg-zoom-reset");
   const zoomInBtn = topbar.querySelector("#pg-zoom-in");
   const zoomOutBtn = topbar.querySelector("#pg-zoom-out");
   const zoomFitBtn = topbar.querySelector("#pg-zoom-fit");
+
+  pageInputEl.max = String(pdfDoc.numPages);
+  pageTotalEl.textContent = `/ ${pdfDoc.numPages}`;
 
   function updateZoomReadout() {
     zoomResetBtn.textContent = `${Math.round(currentZoom * 100)}%`;
@@ -271,8 +278,51 @@
         break;
       }
     }
-    pageIndicatorEl.textContent = `Page ${currentPageNum} / ${pdfDoc.numPages}`;
+    if (document.activeElement !== pageInputEl) {
+      pageInputEl.value = String(currentPageNum);
+    }
+    pageTotalEl.textContent = `/ ${pdfDoc.numPages}`;
   }
+
+  function jumpToPage(pageNumber) {
+    if (!pageHolders.length) return;
+    const raw = String(pageNumber ?? "").trim();
+    const parsed = Math.trunc(Number(raw));
+    if (!raw || !Number.isFinite(parsed)) {
+      updatePageIndicator();
+      return;
+    }
+    const target = Math.min(pdfDoc.numPages, Math.max(1, parsed));
+    pageInputEl.value = String(target);
+    const holder = pageHolders[target - 1];
+    if (holder) {
+      container.scrollTo({
+        top: Math.max(0, holder.offsetTop - 16),
+        behavior: "auto"
+      });
+      localStorage.setItem(scrollKey, String(container.scrollTop));
+    }
+  }
+
+  pageInputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      jumpToPage(pageInputEl.value);
+      pageInputEl.blur();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      pageInputEl.blur();
+      updatePageIndicator();
+    }
+  });
+
+  pageInputEl.addEventListener("change", () => {
+    jumpToPage(pageInputEl.value);
+  });
+
+  pageInputEl.addEventListener("focus", () => {
+    pageInputEl.select();
+  });
 
   const observer = new IntersectionObserver(
     (entries) => {
